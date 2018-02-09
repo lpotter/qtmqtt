@@ -51,12 +51,13 @@
 #include "websocketiodevice.h"
 
 #include <QtCore/QDebug>
-
+#include <QtCore/QCoreApplication>
 WebSocketIODevice::WebSocketIODevice(QObject *parent)
-    : QIODevice(parent)
+    : QIODevice(parent),
+      m_socket(new QWebSocket())
 {
-    connect(&m_socket, &QWebSocket::connected, this, &WebSocketIODevice::onSocketConnected);
-    connect(&m_socket, &QWebSocket::binaryMessageReceived, this, &WebSocketIODevice::handleBinaryMessage);
+    connect(m_socket, &QWebSocket::connected, this, &WebSocketIODevice::onSocketConnected);
+    connect(m_socket, &QWebSocket::binaryMessageReceived, this, &WebSocketIODevice::handleBinaryMessage);
 }
 
 bool WebSocketIODevice::open(QIODevice::OpenMode mode)
@@ -67,14 +68,14 @@ bool WebSocketIODevice::open(QIODevice::OpenMode mode)
     request.setUrl(m_url);
     request.setRawHeader("Sec-WebSocket-Protocol", m_protocol.constData());
 
-    m_socket.open(request);
+    m_socket->open(request);
 
     return QIODevice::open(mode);
 }
 
 void WebSocketIODevice::close()
 {
-    m_socket.close();
+    m_socket->close();
     QIODevice::close();
 }
 
@@ -89,7 +90,7 @@ qint64 WebSocketIODevice::readData(char *data, qint64 maxlen)
 qint64 WebSocketIODevice::writeData(const char *data, qint64 len)
 {
     QByteArray msg(data, len);
-    const int length = m_socket.sendBinaryMessage(msg);
+    const int length = m_socket->sendBinaryMessage(msg);
     return length;
 }
 
@@ -107,6 +108,8 @@ void WebSocketIODevice::handleBinaryMessage(const QByteArray &msg)
 {
     m_buffer.append(msg);
     emit readyRead();
+    QCoreApplication::processEvents();
+
 }
 
 void WebSocketIODevice::onSocketConnected()

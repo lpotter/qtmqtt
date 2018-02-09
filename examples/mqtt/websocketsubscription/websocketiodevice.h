@@ -78,7 +78,7 @@ public slots:
 private:
     QByteArray m_protocol;
     QByteArray m_buffer;
-    QWebSocket m_socket;
+    QWebSocket *m_socket;
     QUrl m_url;
 };
 
