@@ -74,7 +74,7 @@ private:
                           bool dup, bool retain);
     QExplicitlySharedDataPointer<QMqttMessagePrivate> d;
 };
-Q_DECLARE_METATYPE(QMqttMessage);
+
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QMqttMessage)
